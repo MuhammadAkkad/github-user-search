@@ -15,4 +15,14 @@ class ApiService {
     } else
       print(response.statusCode);
   }
+
+  Future getUserPage(String name) async{
+    final response = await http.get(name);
+
+    if(response.statusCode ==200){
+      var res = json.decode(response.body);
+      return res;
+    }else
+      print(response.statusCode);
+  }
 }

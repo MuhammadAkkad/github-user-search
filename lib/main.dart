@@ -1,7 +1,7 @@
-import 'package:flutter/services.dart';
-
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:git_hub_api_proj/api/service.dart' as api;
+import 'package:git_hub_api_proj/views/UserCell.dart';
+import 'package:git_hub_api_proj/views/UserPage.dart';
 
 import 'api/service.dart';
 
@@ -53,31 +53,30 @@ class _MyCustomFormState extends State<MyCustomForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextField(controller: myController,
+              TextField(
+                controller: myController,
                 decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: 'Enter user name',
-                    icon: Icon(Icons.search)
-                ),),
+                    icon: Icon(Icons.search)),
+              ),
               Expanded(
                   child: _isLoading
-                      ? new CircularProgressIndicator()
+                      ? CircularProgressIndicator()
                       : new ListView.builder(
                           itemCount:
                               responseData != null ? responseData.length : 0,
                           itemBuilder: (context, i) {
-                            print(responseData[i]["login"]);
-                            final usr = responseData[i]["login"];
+                            final usr = responseData[i];
                             return new FlatButton(
                                 padding: new EdgeInsets.all(0.0),
                                 child: new UserCell(usr),
                                 onPressed: () {
-                                  print("$i pressed");
-//                                  Navigator.push(
-//                                      context,
-//                                      new MaterialPageRoute(
-//                                          builder: (context) =>
-//                                              new UserPage(vid["id"])));
+                                  Navigator.push(
+                                      context,
+                                      new MaterialPageRoute(
+                                          builder: (context) =>
+                                              new UserPage(responseData[i])));
                                 });
                             return UserCell(usr);
                           })),
@@ -89,55 +88,23 @@ class _MyCustomFormState extends State<MyCustomForm> {
         onPressed: () {
           setState(() {
             this.searchKeyword = myController.text;
-
+            _isLoading = true;
           });
           getResponse(this.myController.text);
         },
-        tooltip: 'Show me the value!',
-        child: Icon(Icons.text_fields),
+        tooltip: 'Send',
+        child: Icon(Icons.send),
       ),
     );
   }
 
-  getResponse(String s) async {
+  getResponse(String user) async {
     ApiService apiService = new ApiService();
-    final response = await apiService.searchUsers(s);
+    final response = await apiService.searchUsers(user);
     setState(() {
       responseData = response;
+      responseData != null ? _isLoading = false : _isLoading = true;
     });
   }
 }
 
-class UserCell extends StatefulWidget {
-  final usr;
-  UserCell(this.usr);
-
-  @override
-  State<StatefulWidget> createState() {
-    return new UserCellState(usr);
-  }
-}
-
-class UserCellState extends State<UserCell> {
-  final usr;
-  UserCellState(this.usr);
-
-  // TODO: impelement user info
-  @override
-  Widget build(BuildContext context) {
-    return new Container(
-        padding: new EdgeInsets.all(16),
-        child: new Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-//            Image.network(usr["imageUrl"]),
-//            new Container(height: 8),
-            new Text(
-              usr,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            new Divider()
-          ],
-        ));
-  }
-}
